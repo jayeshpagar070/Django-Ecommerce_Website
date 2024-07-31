@@ -1,0 +1,46 @@
+{% extends "authentication/baseauth.html" %} 
+{% block title %}Login{% endblock title %} 
+{% block content %}
+
+<body>
+  <div class="container mt-5">
+    {% for message in messages %}
+    <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert" >
+      <strong>{{message}}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    
+    <h2>Login</h2>
+    <form method="POST" action="/vogue_auth/login/">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input
+          type="email"
+          class="form-control w-50"
+          id="email"
+          name="email"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input
+          type="password"
+          class="form-control w-50"
+          id="password"
+          name="password"
+          required
+        />
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+      <br />
+      <br />
+      New User? <a href="/vogue_auth/signup/">Signup</a>
+    </form>
+  </div>
+</body>
+
+{% endblock content %}

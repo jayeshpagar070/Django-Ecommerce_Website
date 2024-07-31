@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<h1>Unleashing Style: Shop the Latest Trends at VogueVerse</h1>
+{% endblock content %}
+
+{% block body %}
+{% load static %}
+
+<!-- Portfolio Section -->
+<section id="portfolio" class="portfolio section">
+
+  <!-- Section Title -->
+  <div class="container section-title" data-aos="fade-up">
+    <h2>Products</h2>
+    <p>Shop The Trending Fashion Products</p>
+  </div><!-- End Section Title -->
+
+  {% for product, range, nSlides in allProds %}
+  <h3 class="my-3 text-center text-success bg-light">{{ product.0.category }} Flashsale</h3>
+
+  <div class="container">
+    <div class="row">
+
+      {% for i in product %}
+      <div class="col-md-3 mt-3">
+        <div class="card">
+          <img src='/media/{{ i.image }}' class="card-img-top" alt="not found" height='250px' width='200px'>
+          <div class="card-body">
+            <h5 class="card-title" id="namepr{{ i.id }}">{{ i.product_name }}</h5>
+            <p class="card-text">{{ i.desc|slice:"0:53" }}...</p>
+            <h6 class="card-title">Price: <span id="pricepr{{ i.id }}">{{ i.price }}</span></h6>
+            <span id="divpr{{ i.id }}" class="divpr">
+              <button id="pr{{ i.id }}" class="btn btn-danger cart btn-sm mt-0">Add to Cart</button>
+            </span>
+            <a href="/media/{{ i.image }}"><button class="btn btn-dark btn-sm"><i class="fa-solid fa-eye"></i></button></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+  {% endfor %}
+
+</section><!-- End Portfolio Section -->
+
+<!-- Popover Trigger Button -->
+<!--<button id="popcart" class="btn btn-primary" data-toggle="popover" data-placement="bottom" data-html="true" title="Cart Items">Cart (0)</button>-->
+
+{% block script %}
+<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+<script>
+  $(document).ready(function() {
+    // Initialize the cart from localStorage
+    var cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : {};
+    updateCart(cart);
+
+    // Event listener for adding items to the cart
+    $('.divpr').on('click', 'button.cart', function() {
+      var idstr = this.id.toString();
+      if (cart[idstr] !== undefined) {
+        cart[idstr][0] += 1;
+      } else {
+        var qty = 1;
+        var name = document.getElementById('name' + idstr).innerHTML;
+        var price = document.getElementById('price' + idstr).innerHTML;
+        cart[idstr] = [qty, name, price];
+      }
+      updateCart(cart);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      $('#popcart').attr('data-content', generatePopoverContent(cart));
+      $('#popcart').popover('show');
+    });
+
+    // Function to generate popover content
+    function generatePopoverContent(cart) {
+      var popStr = "<h5>Cart for your items in my shopping cart</h5><div class='mx-2 my-2'>";
+      for (var item in cart) {
+        popStr += "<b>" + cart[item][1].slice(0, 19) + "...</b> Qty: <b>" + cart[item][0] + "</b><br>";
+      }
+      popStr += "</div><a href='/checkout'><button class='btn btn-success'>Checkout</button></a><button class='btn btn-dark' onclick='clearCart()'>Clear Cart</button>";
+      return popStr;
+    }
+
+    // Function to clear the cart
+    window.clearCart = function() {
+      for (var item in cart) {
+        document.getElementById('div' + item).innerHTML = '<button id="' + item + '" class="btn btn-success cart">Add to Cart</button>';
+      }
+      cart = {};
+      localStorage.clear();
+      updateCart(cart);
+      $('#popcart').popover('hide');
+    }
+
+    // Function to update the cart
+    function updateCart(cart) {
+      var sum = 0;
+      for (var item in cart) {
+        sum += cart[item][0];
+        document.getElementById('div' + item).innerHTML = "<button id='minus" + item + "' class='btn btn-success minus'>-</button> <span id='val" + item + "'>" + cart[item][0] + "</span> <button id='plus" + item + "' class='btn btn-success plus'>+</button>";
+      }
+      $('#popcart').text('Cart (' + sum + ')');
+      $('#popcart').attr('data-content', generatePopoverContent(cart));
+    }
+
+    // Event listeners for the plus and minus buttons
+    $(document).on('click', '.minus', function() {
+      var id = this.id.slice(7);
+      if (cart['pr' + id][0] > 1) {
+        cart['pr' + id][0] -= 1;
+      } else {
+        delete cart['pr' + id];
+        document.getElementById('divpr' + id).innerHTML = '<button id="pr' + id + '" class="btn btn-success cart">Add to Cart</button>';
+      }
+      updateCart(cart);
+      localStorage.setItem('cart', JSON.stringify(cart));
+    });
+
+    $(document).on('click', '.plus', function() {
+      var id = this.id.slice(6);
+      cart['pr' + id][0] += 1;
+      updateCart(cart);
+      localStorage.setItem('cart', JSON.stringify(cart));
+    });
+
+    // Initialize popover
+    $('#popcart').popover({
+      html: true,
+      content: function() {
+        return generatePopoverContent(cart);
+      }
+    });
+  });
+</script>
+{% endblock script %}
+
+{% endblock body %}
